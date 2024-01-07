@@ -1,54 +1,38 @@
 package fourth_test;
 
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
 public class StudentInfoApp {
-    private JFrame frame;
-    private JTextField nameField, usnField, ageField, addressField, sgpa1Field, sgpa2Field, sgpa3Field, sgpa4Field, categoryField;
-    private JTextArea displayArea;
     private Map<Integer, Student> studentMap = new HashMap<>();
 
+    private JFrame frame;
+    private JTextField nameField, usnField, ageField, sgpa1Field, sgpa2Field, sgpa3Field, sgpa4Field, categoryField;
+    private JTextArea displayArea;
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            new StudentInfoApp().createAndShowGUI();
-        });
+        SwingUtilities.invokeLater(() -> new StudentInfoApp().createAndShowGUI());
     }
 
     private void createAndShowGUI() {
-        frame = new JFrame("Student Information System");
+        frame = new JFrame("Student Information App");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 500);
 
         createInputPanel();
         createDisplayPanel();
 
         frame.setLayout(new GridLayout(2, 1));
+        frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
     private void createInputPanel() {
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(11, 2));
+        JPanel inputPanel = new JPanel(new GridLayout(8, 2));
 
         JLabel nameLabel = new JLabel("Name:");
         nameField = new JTextField();
@@ -59,19 +43,16 @@ public class StudentInfoApp {
         JLabel ageLabel = new JLabel("Age:");
         ageField = new JTextField();
 
-        JLabel addressLabel = new JLabel("Address:");
-        addressField = new JTextField();
-
-        JLabel sgpa1Label = new JLabel("SGPA 1:");
+        JLabel sgpa1Label = new JLabel("SGPA Semester 1:");
         sgpa1Field = new JTextField();
 
-        JLabel sgpa2Label = new JLabel("SGPA 2:");
+        JLabel sgpa2Label = new JLabel("SGPA Semester 2:");
         sgpa2Field = new JTextField();
 
-        JLabel sgpa3Label = new JLabel("SGPA 3:");
+        JLabel sgpa3Label = new JLabel("SGPA Semester 3:");
         sgpa3Field = new JTextField();
 
-        JLabel sgpa4Label = new JLabel("SGPA 4:");
+        JLabel sgpa4Label = new JLabel("SGPA Semester 4:");
         sgpa4Field = new JTextField();
 
         JLabel categoryLabel = new JLabel("Category:");
@@ -81,7 +62,7 @@ public class StudentInfoApp {
         computeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                computeButtonClicked();
+                computeCGPA();
             }
         });
 
@@ -89,7 +70,7 @@ public class StudentInfoApp {
         doneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                doneButtonClicked();
+                addStudentDetails();
             }
         });
 
@@ -99,8 +80,6 @@ public class StudentInfoApp {
         inputPanel.add(usnField);
         inputPanel.add(ageLabel);
         inputPanel.add(ageField);
-        inputPanel.add(addressLabel);
-        inputPanel.add(addressField);
         inputPanel.add(sgpa1Label);
         inputPanel.add(sgpa1Field);
         inputPanel.add(sgpa2Label);
@@ -118,63 +97,93 @@ public class StudentInfoApp {
     }
 
     private void createDisplayPanel() {
-        JPanel displayPanel = new JPanel();
+        JPanel displayPanel = new JPanel(new BorderLayout());
+
         displayArea = new JTextArea();
         displayArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(displayArea);
-        displayPanel.add(scrollPane);
+
+        JButton displayButton = new JButton("Display");
+        displayButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayStudentDetails();
+            }
+        });
+
+        displayPanel.add(scrollPane, BorderLayout.CENTER);
+        displayPanel.add(displayButton, BorderLayout.SOUTH);
+
         frame.add(displayPanel);
     }
 
-    private void computeButtonClicked() {
+    private void computeCGPA() {
         try {
-            String name = nameField.getText();
-            String usn = usnField.getText();
             int age = Integer.parseInt(ageField.getText());
-            String address = addressField.getText();
             double sgpa1 = Double.parseDouble(sgpa1Field.getText());
             double sgpa2 = Double.parseDouble(sgpa2Field.getText());
             double sgpa3 = Double.parseDouble(sgpa3Field.getText());
             double sgpa4 = Double.parseDouble(sgpa4Field.getText());
-            String category = categoryField.getText();
 
-            if (age <= 18 || age > 30 || sgpa1 < 0 || sgpa1 > 10 || sgpa2 < 0 || sgpa2 > 10 ||
-                    sgpa3 < 0 || sgpa3 > 10 || sgpa4 < 0 || sgpa4 > 10) {
-                JOptionPane.showMessageDialog(frame, "Invalid input. Please check age and SGPA values.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (age <= 18 || age > 30 || sgpa1 < 0 || sgpa1 > 10 || sgpa2 < 0 || sgpa2 > 10 || sgpa3 < 0 || sgpa3 > 10 || sgpa4 < 0 || sgpa4 > 10) {
+                JOptionPane.showMessageDialog(frame, "Invalid entries. Please check age and SGPA values.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
+                // Compute CGPA and display in a message dialog
                 double cgpa = (sgpa1 + sgpa2 + sgpa3 + sgpa4) / 4.0;
-                JOptionPane.showMessageDialog(frame, "CGPA computed: " + cgpa, "Compute CGPA", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "CGPA: " + cgpa, "CGPA Calculation", JOptionPane.INFORMATION_MESSAGE);
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Invalid input. Please enter numeric values for age and SGPA.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Invalid entries. Please enter numeric values.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void doneButtonClicked() {
+    private void addStudentDetails() {
         try {
-            String name = nameField.getText();
-            String usn = usnField.getText();
             int age = Integer.parseInt(ageField.getText());
-            String address = addressField.getText();
-            double sgpa1 = Double.parseDouble(sgpa1Field.getText());
-            double sgpa2 = Double.parseDouble(sgpa2Field.getText());
-            double sgpa3 = Double.parseDouble(sgpa3Field.getText());
-            double sgpa4 = Double.parseDouble(sgpa4Field.getText());
-            String category = categoryField.getText();
 
-            if (age <= 18 || age > 30 || sgpa1 < 0 || sgpa1 > 10 || sgpa2 < 0 || sgpa2 > 10 ||
-                    sgpa3 < 0 || sgpa3 > 10 || sgpa4 < 0 || sgpa4 > 10) {
-                JOptionPane.showMessageDialog(frame, "Invalid input. Please check age and SGPA values.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (age <= 18 || age > 30) {
+                JOptionPane.showMessageDialog(frame, "Invalid age. Age must be between 19 and 30.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                Student student = new Student(name, usn, age, address, sgpa1, sgpa2, sgpa3, sgpa4, category);
-                studentMap.put(student.getStudentId(), student);
+                String name = nameField.getText();
+                String usn = usnField.getText();
+                String category = categoryField.getText();
+
+                // Generate a unique student ID
+                int studentId = studentMap.size() + 1;
+
+                // Create a Student object with entered details
+                Student student = new Student(studentId, name, usn, age, category);
+                student.setSgpa1(Double.parseDouble(sgpa1Field.getText()));
+                student.setSgpa2(Double.parseDouble(sgpa2Field.getText()));
+                student.setSgpa3(Double.parseDouble(sgpa3Field.getText()));
+                student.setSgpa4(Double.parseDouble(sgpa4Field.getText()));
+
+                // Add student details to the HashMap
+                studentMap.put(studentId, student);
+
                 JOptionPane.showMessageDialog(frame, "Student details added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-                // Clear input fields
+                // Clear the input fields
                 clearInputFields();
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Invalid input. Please enter numeric values for age and SGPA.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Invalid age. Please enter a valid numeric age.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void displayStudentDetails() {
+        displayArea.setText("");
+        for (Student student : studentMap.values()) {
+            displayArea.append("Student ID: " + student.getStudentId() + "\n");
+            displayArea.append("Name: " + student.getName() + "\n");
+            displayArea.append("USN: " + student.getUsn() + "\n");
+            displayArea.append("Age: " + student.getAge() + "\n");
+            displayArea.append("Category: " + student.getCategory() + "\n");
+            displayArea.append("SGPA Semester 1: " + student.getSgpa1() + "\n");
+            displayArea.append("SGPA Semester 2: " + student.getSgpa2() + "\n");
+            displayArea.append("SGPA Semester 3: " + student.getSgpa3() + "\n");
+            displayArea.append("SGPA Semester 4: " + student.getSgpa4() + "\n");
+            displayArea.append("----------------------------\n");
         }
     }
 
@@ -182,18 +191,10 @@ public class StudentInfoApp {
         nameField.setText("");
         usnField.setText("");
         ageField.setText("");
-        addressField.setText("");
         sgpa1Field.setText("");
         sgpa2Field.setText("");
         sgpa3Field.setText("");
         sgpa4Field.setText("");
         categoryField.setText("");
-    }
-
-    private void displayButtonClicked() {
-        displayArea.setText("");
-        for (Map.Entry<Integer, Student> entry : studentMap.entrySet()) {
-            displayArea.append(entry.getValue().toString() + "\n\n");
-        }
     }
 }
